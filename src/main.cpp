@@ -35,8 +35,9 @@ int main() {
 
   PID pid;
   /**
-   * TODO: Initialize the pid variable.
+   * After twiddle, initialize the variables with these values. Earlier the values (0.2, 0.004, 3) were taken using class reference
    */
+  pid.Init(0.21651, 0.004, 2.5);
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
@@ -63,7 +64,16 @@ int main() {
            * NOTE: Feel free to play around with the throttle and speed.
            *   Maybe use another PID controller to control the speed!
            */
-          
+          pid.UpdateError(cte);
+
+#if 0 // To calculate params use twiddle
+          if(speed > 25.0)
+          { 
+            // pid.ProcessTwiddle();
+          }
+#endif
+          steer_value = pid.GetSteering();
+
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
                     << std::endl;

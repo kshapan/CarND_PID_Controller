@@ -1,6 +1,17 @@
 #ifndef PID_H
 #define PID_H
 
+#include <tuple>
+#include <vector>
+
+
+enum class TwiddleState
+{
+  kReset,
+  kAdded,
+  kSubtracted
+};
+
 class PID {
  public:
   /**
@@ -25,26 +36,48 @@ class PID {
    */
   void UpdateError(double cte);
 
+
   /**
    * Calculate the total PID error.
    * @output The total PID error
    */
-  double TotalError();
+  
+  void ProcessTwiddle();
+
+  /**
+   * Calculate the total PID error.
+   * @output The total PID error
+   */
+  std::tuple<double, double, double> GetParams();
+
+  double GetSteering(void);
 
  private:
+  void Twiddle(double error, double tol = 1E-6);
+  int number_processed_inputs_{};
+  double squared_error_sum_{};
+  double best_error{1E5};
+
   /**
    * PID Errors
    */
-  double p_error;
-  double i_error;
-  double d_error;
+  double p_error{0};
+  double i_error{0};
+  double d_error{0};
 
   /**
    * PID Coefficients
    */ 
-  double Kp;
-  double Ki;
-  double Kd;
+  double Kp{};
+  double Ki{};
+  double Kd{};
+
+  std::vector<double> dp{.1, .001, .5}; 
+
+  int number_of_iteration{0};
+  int current_index{0};
+
+  TwiddleState twiddle_state{TwiddleState::kReset};
 };
 
 #endif  // PID_H
